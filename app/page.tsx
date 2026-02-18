@@ -12,14 +12,23 @@ export default async function Home() {
   } = await supabase.auth.getUser()
 
   if (!user) {
+    console.log('No user found, redirecting to /login')
     return redirect('/login')
   }
 
-  const { data: bookmarks } = await supabase
+  console.log('User found:', user.id)
+
+  const { data: bookmarks, error: bookmarksError } = await supabase
     .from('bookmarks')
     .select('*')
     .eq('user_id', user.id)
     .order('created_at', { ascending: false })
+
+  if (bookmarksError) {
+    console.error('Error fetching bookmarks:', bookmarksError)
+  }
+
+  console.log('Bookmarks fetched:', bookmarks?.length || 0)
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-black text-white">
